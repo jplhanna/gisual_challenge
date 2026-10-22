@@ -1,0 +1,42 @@
+---
+title: Model diagram
+---
+classDiagram
+    class Incident {
+        uuid: uuid | pk
+        datetime_created: timestamp
+        incident_datetime: timestamp
+        resolution_datetime: timestamp | nullable
+        incident_type: str // Enum of possible incidents
+        priority: int
+        location_uuid: uuid | fk
+    }
+
+    class Vehicle {
+        uuid: uuid | pk
+        active: bool
+        in_use: bool
+        location_uuid: uuid | fk
+    }
+
+    class IncidentsVehicles {
+        incident_uuid: uuid | pk
+        vehicle_uuid: uuid | pk
+    }
+
+    class Location {
+        uuid: uuid | pk
+        coordinates: str
+        // This information is guaranteed for incidents
+        street_1: str | nullable
+        street_2: str | nullable
+        city: str | nullable
+        state: str | nullable
+        zip_code: str | nullable
+        notes: str | nullable
+    }
+
+    Incident <|-- Location
+    Vehicle <|-- Location
+    IncidentsVehicles --|> Vehicle
+    IncidentsVehicles --|> Incident

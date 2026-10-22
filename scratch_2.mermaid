@@ -1,0 +1,58 @@
+C4Context
+    title Emergency Service Architecture
+    Enterprise_Boundary(b0, "Incident Boundary"){
+        Person(customerA, "Incident Reporter")
+        Person(customerB, "Vehicle")
+
+        System_Boundary(b1, "Outer Service Boundary"){
+            System(LoadBalancer, "DNS and Load Balancer")
+            System_Boundary(b2, "Inner Service Boundary"){
+                System(IncidentServer, "Incident Server")
+                System_Boundary(b4, "Queue Boundary"){
+                    SystemQueue(IncidentQueue, "Incident Queue")
+                    SystemQueue(DLQ, "Incident Dead Letter Queue")
+                }
+                System(IncidentManager, "Async Incident Manager")
+                System_Boundary(b3, "Data Boundary"){
+                    SystemDb(Cache, "Incident Cache")
+                    System(ConnectionPool, "Connection Pool")
+                    SystemDb(IncidentDb, "Incident Database")
+                }
+                System(RoutingService, "Routing Service")
+            }
+        }
+    }
+    Rel(customerA, LoadBalancer, "Create Incident")
+    Rel(customerB, LoadBalancer, "Dispatch and route Vehicles")
+    Rel(LoadBalancer, IncidentServer, "Forwards Traffic")
+    Rel(LoadBalancer, RoutingService, "Forwards Traffic")
+    Rel(IncidentServer, IncidentQueue, "Add incident to queue")
+    Rel(RoutingService, Cache, "Read locations")
+    Rel(IncidentManager, RoutingService, "Calculate Vehicle distance")
+    BiRel(IncidentQueue, IncidentManager, "Pull or re-add incident from queue")
+    BiRel(IncidentManager, Cache, "Update Incidents and Vehicles")
+    BiRel(IncidentServer, Cache, "Read and Write")
+    BiRel(Cache, ConnectionPool, "Connect")
+    BiRel(ConnectionPool, IncidentDb, "Connect")
+    BiRel(IncidentQueue, DLQ, "DLQ")
+
+    UpdateRelStyle(customerA, LoadBalancer, "white", "blue", "-40", "-60")
+    UpdateRelStyle(customerB, LoadBalancer, "white", "blue", "-40", "-60")
+    UpdateRelStyle(LoadBalancer, IncidentServer, "white", "green", "-40", "-60")
+    UpdateRelStyle(LoadBalancer, RoutingService, "white", "green", "-220", "-60")
+    UpdateRelStyle(IncidentServer, IncidentQueue, "white", "aqua", "-40", "-60")
+    UpdateRelStyle(IncidentQueue, IncidentManager, "white", "aqua", "-10", "-80")
+    UpdateRelStyle(IncidentQueue, DLQ, "white", "aqua", "-10", "-20")
+    UpdateRelStyle(IncidentManager, RoutingService, "white", "green", "-60", "-40")
+    UpdateRelStyle(IncidentServer, Cache, "white", "yellow", "-40", "-10")
+    UpdateRelStyle(IncidentManager, Cache, "white", "yellow", "80", "-60")
+    UpdateRelStyle(RoutingService, Cache, "white", "yellow", "-220", "-20")
+    UpdateRelStyle(Cache, ConnectionPool, "white", "orange", "-20", "-20")
+    UpdateRelStyle(ConnectionPool, IncidentDb, "white", "orange", "-20", "-20")
+
+    UpdateElementStyle(b0, $borderColor="white")
+    UpdateElementStyle(b1, $borderColor="white")
+    UpdateElementStyle(b2, $borderColor="white")
+    UpdateElementStyle(b3, $borderColor="white")
+    UpdateElementStyle(b4, $borderColor="white")
+
